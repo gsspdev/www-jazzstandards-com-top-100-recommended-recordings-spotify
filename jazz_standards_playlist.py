@@ -127,7 +127,7 @@ class JazzStandardsSpotifyPlaylist:
                     seen.add(key)
                     unique_recordings.append(recording)
             
-            recordings = unique_recordings[:10]  # Limit to 10 recordings
+            recordings = unique_recordings[:6]  # Limit to 6 recordings
                         
         except Exception as e:
             logger.error(f"Error scraping recordings from {standard_url}: {e}")
@@ -139,7 +139,7 @@ class JazzStandardsSpotifyPlaylist:
     
     def search_spotify_track(self, standard_title: str, artist: str, recording_info: str) -> Optional[str]:
         """
-        Search for a track on Spotify with user feedback and confirmation
+        Search for a track on Spotify with automatic acceptance for strong matches
         
         Args:
             standard_title: Title of the jazz standard
@@ -147,7 +147,7 @@ class JazzStandardsSpotifyPlaylist:
             recording_info: Additional recording info
             
         Returns:
-            Spotify track URI if found and accepted by user, None otherwise
+            Spotify track URI if found and accepted, None otherwise
         """
         try:
             print(f"\n🎵 Searching for: '{standard_title}' by {artist}")
@@ -167,22 +167,38 @@ class JazzStandardsSpotifyPlaylist:
                 if results['tracks']['items']:
                     # Try to find best match
                     best_match = None
+                    is_strong_match = False
+                    
                     for track in results['tracks']['items']:
                         track_name = track['name'].lower()
                         artist_names = [a['name'].lower() for a in track['artists']]
                         
-                        # Check if standard title is in track name
-                        if any(word in track_name for word in standard_title.lower().split()):
-                            # Check if artist matches
-                            if any(artist.lower() in artist_name for artist_name in artist_names):
-                                best_match = track
-                                break
+                        # Check for strong match: artist name matches and song title matches
+                        artist_match = any(artist.lower() in artist_name or artist_name in artist.lower() for artist_name in artist_names)
+                        title_match = any(word in track_name for word in standard_title.lower().split()) or standard_title.lower() in track_name
+                        
+                        if artist_match and title_match:
+                            best_match = track
+                            is_strong_match = True
+                            break
                     
-                    # If no exact match, use first result
+                    # If no strong match, try to find best available match
+                    if not best_match:
+                        for track in results['tracks']['items']:
+                            track_name = track['name'].lower()
+                            artist_names = [a['name'].lower() for a in track['artists']]
+                            
+                            # Check if standard title is in track name
+                            if any(word in track_name for word in standard_title.lower().split()):
+                                # Check if artist matches
+                                if any(artist.lower() in artist_name for artist_name in artist_names):
+                                    best_match = track
+                                    break
+                    
+                    # If still no match, use first result
                     if not best_match:
                         best_match = results['tracks']['items'][0]
                     
-                    # Show the match to user and ask for confirmation
                     track_artist = best_match['artists'][0]['name']
                     track_name = best_match['name']
                     album_name = best_match['album']['name']
@@ -190,6 +206,13 @@ class JazzStandardsSpotifyPlaylist:
                     print(f"✅ Found match: {track_artist} - {track_name}")
                     print(f"   Album: {album_name}")
                     
+                    # Auto-accept strong matches
+                    if is_strong_match:
+                        print("   🎯 Strong match detected - automatically accepted!")
+                        logger.info(f"Auto-accepted strong match: {track_artist} - {track_name}")
+                        return best_match['uri']
+                    
+                    # Ask user for confirmation on weaker matches
                     while True:
                         response = input("   Accept this match? (y/n/s to skip all for this song): ").lower().strip()
                         if response in ['y', 'yes']:
