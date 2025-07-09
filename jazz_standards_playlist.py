@@ -345,9 +345,6 @@ class JazzStandardsSpotifyPlaylist:
 def main():
     # Configuration
     # You need to create a Spotify app at https://developer.spotify.com/dashboard
-    # CLIENT_ID = "2a831f2efd154944b2808d576e5b223e"
-    # CLIENT_SECRET = "642c777774204630a1ea4dd2578736cf"
-    # REDIRECT_URI = "http://127.0.0.1:8888/callback"
     
     # Create and run the scraper
     scraper = JazzStandardsSpotifyPlaylist(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI)
