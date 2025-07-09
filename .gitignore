@@ -1,0 +1,5 @@
+config.py
+.claude/
+CLAUDE.md
+__pycache__/
+.cache
