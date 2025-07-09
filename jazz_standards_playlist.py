@@ -5,8 +5,7 @@ from spotipy.oauth2 import SpotifyOAuth
 import time
 import re
 from typing import List, Dict, Optional
-import logging
-from config import CLIENT_ID, CLIENT_SECRET, REDIRECT_URI
+import logging from config import CLIENT_ID, CLIENT_SECRET, REDIRECT_URI
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -345,9 +344,6 @@ class JazzStandardsSpotifyPlaylist:
 def main():
     # Configuration
     # You need to create a Spotify app at https://developer.spotify.com/dashboard
-    # CLIENT_ID = "2a831f2efd154944b2808d576e5b223e"
-    # CLIENT_SECRET = "642c777774204630a1ea4dd2578736cf"
-    # REDIRECT_URI = "http://127.0.0.1:8888/callback"
     
     # Create and run the scraper
     scraper = JazzStandardsSpotifyPlaylist(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI)
